@@ -15,6 +15,7 @@ class Scanner:
         self.print_lock = Lock()
         self.max_workers = max_workers
         self.executor: ThreadPoolExecutor = None
+        self.end = False
 
     def start(self, tcp_only: bool, udp_only: bool):
         if self.executor is None:
@@ -27,6 +28,9 @@ class Scanner:
                 self.executor.submit(self.scan_udp_port, port)
 
     def scan_udp_port(self, port: int, timeout=1):
+        if self.end:
+            return
+
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_RAW,
                                socket.IPPROTO_ICMP) as sock:
@@ -44,6 +48,9 @@ class Scanner:
                 print(f'UDP {port}: Not enough rights')
 
     def scan_tcp_port(self, port: int, timeout=0.5):
+        if self.end:
+            return
+
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(timeout)
@@ -70,3 +77,6 @@ class Scanner:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.executor.shutdown()
+
+    def cancel(self):
+        self.end = True
