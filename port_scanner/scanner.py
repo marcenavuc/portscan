@@ -28,14 +28,17 @@ class Scanner:
 
     def scan_udp_port(self, port: int, timeout=1):
         try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-                sock.settimeout(timeout)
-                sock.sendto(b'ping', (self.host, port))
-                sock.recvfrom(1024)
+            with socket.socket(socket.AF_INET, socket.SOCK_RAW,
+                               socket.IPPROTO_ICMP) as sock:
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+                                   socket.IPPROTO_UDP) as client:
+                    client.sendto("ping".encode('utf_8'), (self.host, port))
+                    sock.settimeout(timeout)
+                    sock.recvfrom(1024)
+        except socket.timeout:
             protocol = self.get_protocol(port, 'udp')
-            print(f'UDP {port} {protocol}')
-        except (socket.timeout, OSError):
-            pass
+            if protocol:
+                print(f'UDP {port} {protocol}')
         except PermissionError:
             with self.print_lock:
                 print(f'UDP {port}: Not enough rights')
