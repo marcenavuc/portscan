@@ -14,5 +14,7 @@ def parse_args():
                         metavar='PORT', help='Port range')
     parser.add_argument("-j", "--jobs", default=2,
                         help="max threads", type=int)
+    parser.add_argument("--timeout", default=1,
+                        help="timeout in seconds", type=int)
     parser.add_argument('host', help='hostname in network')
     return parser.parse_args()

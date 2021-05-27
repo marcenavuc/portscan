@@ -36,3 +36,7 @@ TCP 63342
 ```
 UDP 53 DOMAIN
 ```
+
+```
+sudo python3 -m port_scanner habr.ru -t -p 70 100 -j 10
+```
