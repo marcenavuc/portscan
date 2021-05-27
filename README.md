@@ -28,3 +28,11 @@ TCP 55214
 TCP 57621 
 TCP 63342 
 ```
+## Example: Scanning udp ports
+``` sudo python3 -m port_scanner google.com -u -p 50 60 -j 3```
+
+**Output**
+ 
+```
+UDP 53 DOMAIN
+```

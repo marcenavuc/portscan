@@ -1,7 +1,12 @@
+import random
 import socket
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from queue import Queue
+
+
+random_time = random.randint(2 ** 16, 2 ** 64 - 1).to_bytes(8, 'big')
+udp_to_send = b'\x13' + b'\0' * 39 + random_time
 
 
 class Scanner:
@@ -20,22 +25,20 @@ class Scanner:
     def start(self, tcp_only: bool, udp_only: bool):
         if self.executor is None:
             raise ValueError("You need run this method in contextmanager")
-
+        futures = []
         for port in range(self.port_start, self.port_end + 1):
             if tcp_only:
-                self.executor.submit(self.scan_tcp_port, port)
+                futures.append(self.executor.submit(self.scan_tcp_port, port))
             if udp_only:
-                self.executor.submit(self.scan_udp_port, port)
+                futures.append(self.executor.submit(self.scan_udp_port, port))
 
     def scan_udp_port(self, port: int, timeout=1):
         if self.end:
             return
 
         try:
-            with socket.socket(socket.AF_INET, socket.SOCK_RAW,
-                               socket.IPPROTO_ICMP) as sock:
-                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
-                                   socket.IPPROTO_UDP) as client:
+            with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP) as sock:
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as client:
                     client.sendto("ping".encode('utf_8'), (self.host, port))
                     sock.settimeout(timeout)
                     sock.recvfrom(1024)

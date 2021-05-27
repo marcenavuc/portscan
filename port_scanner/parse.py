@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument('-p', '--ports', nargs=2,
                         default=[1, 65535], type=int,
                         metavar='PORT', help='Port range')
-    parser.add_argument("-j", "--jobs", default=1,
+    parser.add_argument("-j", "--jobs", default=2,
                         help="max threads", type=int)
     parser.add_argument('host', help='hostname in network')
     return parser.parse_args()
